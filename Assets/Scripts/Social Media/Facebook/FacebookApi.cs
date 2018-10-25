@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Facebook.Unity;
+//using Facebook.Unity;
 
 public class FacebookApi : MonoBehaviour
 {
@@ -17,96 +17,96 @@ public class FacebookApi : MonoBehaviour
     void Awake()
     {
         Debug.Log("Looking for cube thingy");
-        if (!FB.IsInitialized)
-        {
-            // Initialize the Facebook SDK
-            FB.Init(InitCallback);
-        }
-        else
-        {
-            // Already initialized, signal an app activation App Event
-            FB.ActivateApp();
-        }
+        //if (!FB.IsInitialized)
+        //{
+        //    // Initialize the Facebook SDK
+        //    FB.Init(InitCallback);
+        //}
+        //else
+        //{
+        //    // Already initialized, signal an app activation App Event
+        //    FB.ActivateApp();
+        //}
     }
 
     private void InitCallback()
     {
-        if (FB.IsInitialized)
-        {
-            Debug.Log("Successfully Initialized the Facebook SDK");
+        //if (FB.IsInitialized)
+        //{
+        //    Debug.Log("Successfully Initialized the Facebook SDK");
 
-            // Signal an app activation App Event
-            FB.ActivateApp();
+        //    // Signal an app activation App Event
+        //    FB.ActivateApp();
 
-            //Login and get permissions to user's FB account
-            FB.LogInWithReadPermissions(
-                new List<string>() { "public_profile", "user_posts" },
-                LoginCallback
-            );
-        }
-        else
-        {
-            Debug.Log("Failed to Initialize the Facebook SDK");
-        }
+        //    //Login and get permissions to user's FB account
+        //    FB.LogInWithReadPermissions(
+        //        new List<string>() { "public_profile", "user_posts" },
+        //        LoginCallback
+        //    );
+        //}
+        //else
+        //{
+        //    Debug.Log("Failed to Initialize the Facebook SDK");
+        //}
     }
 
-    private void LoginCallback(ILoginResult result)
-    {
-        if (FB.IsLoggedIn)
-        {
-            // AccessToken class will have session details
-            var aToken = Facebook.Unity.AccessToken.CurrentAccessToken;
-            // Print current access token's User ID
-            Debug.Log(aToken.UserId);
-            // Print current access token's granted permissions
-            foreach (string perm in aToken.Permissions)
-            {
-                Debug.Log(perm);
-            }
+    //private void LoginCallback(ILoginResult result)
+    //{
+    //    if (FB.IsLoggedIn)
+    //    {
+    //        // AccessToken class will have session details
+    //        var aToken = Facebook.Unity.AccessToken.CurrentAccessToken;
+    //        // Print current access token's User ID
+    //        Debug.Log(aToken.UserId);
+    //        // Print current access token's granted permissions
+    //        foreach (string perm in aToken.Permissions)
+    //        {
+    //            Debug.Log(perm);
+    //        }
 
-            //get 3 most recent posts
-            FB.API(
-                "/me/posts?fields=created_time,message,full_picture,picture&limit=25",
-                HttpMethod.GET,
-                PostsCallback
-            );
-        }
-        else
-        {
-            Debug.Log("User cancelled login");
-        }
-    }
+    //        //get 3 most recent posts
+    //        FB.API(
+    //            "/me/posts?fields=created_time,message,full_picture,picture&limit=25",
+    //            HttpMethod.GET,
+    //            PostsCallback
+    //        );
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("User cancelled login");
+    //    }
+    //}
 
-    private void PostsCallback(IGraphResult result)
-    {
-        if (result.Error == null)
-        {
-            Debug.Log("Result: " + result.RawResult);
+    //private void PostsCallback(IGraphResult result)
+    //{
+    //    if (result.Error == null)
+    //    {
+    //        Debug.Log("Result: " + result.RawResult);
 
-            FBGraphResult graphObject = FBGraphResult.CreateFromJSON(result.RawResult);
-            if (graphObject != null)
-            {
-                Debug.Log("Created a graphObject");
-                Debug.Log("num posts: " + graphObject.data.Count);
-                for(int i = 0; i < 3; i++)
-                {
-                    Debug.Log("id: " + graphObject.data[i].id + ", message: " +
-                        graphObject.data[i].message + " full pic: " +
-                        graphObject.data[i].full_picture + " pic: " +
-                        graphObject.data[i].picture);
+    //        FBGraphResult graphObject = FBGraphResult.CreateFromJSON(result.RawResult);
+    //        if (graphObject != null)
+    //        {
+    //            Debug.Log("Created a graphObject");
+    //            Debug.Log("num posts: " + graphObject.data.Count);
+    //            for(int i = 0; i < 3; i++)
+    //            {
+    //                Debug.Log("id: " + graphObject.data[i].id + ", message: " +
+    //                    graphObject.data[i].message + " full pic: " +
+    //                    graphObject.data[i].full_picture + " pic: " +
+    //                    graphObject.data[i].picture);
 
-                    if(graphObject.data[i].picture != "")
-                    {
-                        IEnumerator coroutine = DownloadFBImage(graphObject.data[i].picture);
-                        StartCoroutine(coroutine);
-                    }
-                }
-            }
-        }
+    //                if(graphObject.data[i].picture != "")
+    //                {
+    //                    IEnumerator coroutine = DownloadFBImage(graphObject.data[i].picture);
+    //                    StartCoroutine(coroutine);
+    //                }
+    //            }
+    //        }
+    //    }
 
-        FB.LogOut();
+    //    FB.LogOut();
 
-    }
+    //}
 
     IEnumerator DownloadFBImage(string url)
     {
