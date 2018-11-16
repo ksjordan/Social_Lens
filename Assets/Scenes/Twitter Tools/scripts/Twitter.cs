@@ -38,7 +38,11 @@ namespace Twitter
 		{
 			char[] delim = { ' ', ':' };
 			string[] chunks = created_at.Split(delim);
-
+            Debug.Log("Chunk size: " + chunks.Length);
+            for(int i =0; i < chunks.Length; i++)
+            {
+                Debug.Log(chunks[i]);
+            }
 			FormatedDateTime.Weekday = chunks [0];
 			FormatedDateTime.Month = chunks [1];
 			FormatedDateTime.Day = int.Parse(chunks [2]);
@@ -256,14 +260,17 @@ namespace Twitter
 		public static TwitterUser GetProfileInfo (string name, string AccessToken, bool isID)
 		{
 			string s = WebRequest("https://api.twitter.com/1.1/users/show.json?" + (isID ? "user_id=" : "screen_name=") + name + "&include_entities=false",AccessToken);
-
+            Debug.Log("JSON response: " + s);
 			TwitterUser output = JsonUtility.FromJson<TwitterUser>(s);
 			if (output != null) {
 				output.FormatCreationTime();
 				if (output.status.created_at != null) {
 					output.status.FormatCreationTime();
-					if (output.status.retweeted_status.created_at != null)
-						output.status.retweeted_status.FormatCreationTime();
+                    if(output.status.retweeted)
+                    {
+                        if (output.status.retweeted_status.created_at != null)
+                            output.status.retweeted_status.FormatCreationTime();
+                    }
 				}
 				if (output.screen_name == " ")
 					output.screen_name = "Somebody with a non-ascii name";
@@ -302,7 +309,8 @@ namespace Twitter
 		public static Tweet[] GetUserTimeline (string user, int amount, string token)
 		{
 			string input = WebRequest("https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=" + user + "&count=" + amount + "&include_rts=true",token);
-			if (!string.IsNullOrEmpty(input)) {
+            Debug.Log("Tweets JSON: " + input);
+            if (!string.IsNullOrEmpty(input)) {
 				//Remove the [ and ] characters that encapsulate the web response
 				input = input.Remove(0,1);
 				input = input.Remove(input.Length - 1,1);
