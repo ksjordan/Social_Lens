@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-
+using HoloToolkit.UX.Dialog;
 
 public class FaceAnalysis : MonoBehaviour {
 
@@ -47,6 +47,14 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     private const string personGroupId = "sociallens";
 
+    //Twitter variables
+    private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
+    private string secret = "TINPY6L5pWFAW3zFKQz2T9WymDa1jVQD2az3Ym98eVgsPB43kI";
+    private string accessToken;
+    Twitter.TwitterUser newUser;
+    Twitter.Tweet[] tweets;
+    public Dialog dialogPrefab;
+
     /// <summary>
     /// Initialises this class
     /// </summary>
@@ -60,6 +68,34 @@ public class FaceAnalysis : MonoBehaviour {
 
         // Create the text label in the scene
         CreateLabel();
+    }
+
+    private void LoadTwitterContent(string twitterHandle)
+    {
+        accessToken = Twitter.API.GetTwitterAccessToken(key, secret);
+        Debug.Log(accessToken);
+
+        if (accessToken != null)
+        {
+            newUser = Twitter.API.GetProfileInfo(twitterHandle, accessToken, false);
+            tweets = Twitter.API.GetUserTimeline(twitterHandle, 6, accessToken);
+
+            if (newUser == null || tweets == null)
+            {
+                Debug.Log("User or Tweets is null");
+                return;
+            }
+
+            for (int i = 0; i < 1; i++)
+            {
+                Debug.Log("Generating new Dialog game object");
+                Dialog dialog = Dialog.Open(dialogPrefab.gameObject, DialogButtonType.Next | DialogButtonType.Close, tweets[i].user.screen_name, tweets[i].text);
+            }
+        }
+        else
+        {
+            Debug.Log("Access Token is NULL!");
+        }
     }
 
     /// <summary>
@@ -201,6 +237,32 @@ public class FaceAnalysis : MonoBehaviour {
 
             // Display the name of the person in the UI
             labelText.text = identifiedPerson_RootObject.name;
+
+
+            switch(identifiedPerson_RootObject.name)
+            {
+                case "Christin Carter":
+                    LoadTwitterContent("cartercorpp");
+                    break;
+                case "Renu Hiremath":
+                    LoadTwitterContent("renu__hiremath");
+                    break;
+                case "Yoofi Quansah":
+                    LoadTwitterContent("yquansah_");
+                    break; 
+                case "Savitha Sameerdas":
+                    LoadTwitterContent("savithasameer");
+                    break;
+                case "Ganesh Ram":
+                    LoadTwitterContent("BBC");
+                    break;
+                case "Kristin Jordan":
+                    LoadTwitterContent("kjcookies");
+                    break;
+                case "HariKrishna Prabhu":
+                    LoadTwitterContent("realDonaldTrump");
+                    break;
+            }
         }
     }
 }

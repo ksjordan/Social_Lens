@@ -202,6 +202,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb2ad1b7b1b2e9e429188cd29ed35a4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dialogPrefab: {fileID: 114617495383521140, guid: 675f0fa1333683640974b1e6c078079e,
+    type: 2}
 --- !u!1 &665537775
 GameObject:
   m_ObjectHideFlags: 0
