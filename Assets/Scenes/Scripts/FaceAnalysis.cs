@@ -40,7 +40,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// <summary>
     /// Auth key of Face Recognition Service
     /// </summary>
-    private const string key = "a4504a82a15043ccb92656452cbf21aa";
+    private const string azureKey = "69e550a6bafc449b8f90bb2c56e5d846";
 
     /// <summary>
     /// Id (name) of the created person group 
@@ -72,7 +72,7 @@ public class FaceAnalysis : MonoBehaviour {
 
     private void LoadTwitterContent(string twitterHandle)
     {
-        accessToken = Twitter.API.GetTwitterAccessToken(key, secret);
+        accessToken = Twitter.API.GetTwitterAccessToken(twitterKey, secret);
         Debug.Log(accessToken);
 
         if (accessToken != null)
@@ -136,7 +136,7 @@ public class FaceAnalysis : MonoBehaviour {
         using (UnityWebRequest www =
             UnityWebRequest.Post(detectFacesEndpoint, webForm))
         {
-            www.SetRequestHeader("Ocp-Apim-Subscription-Key", key);
+            www.SetRequestHeader("Ocp-Apim-Subscription-Key", azureKey);
             www.SetRequestHeader("Content-Type", "application/octet-stream");
             www.uploadHandler.contentType = "application/octet-stream";
             www.uploadHandler = new UploadHandlerRaw(imageBytes);
@@ -144,6 +144,7 @@ public class FaceAnalysis : MonoBehaviour {
 
             yield return www.SendWebRequest();
             string jsonResponse = www.downloadHandler.text;
+            Debug.Log("csci538: " + jsonResponse);
             Face_RootObject[] face_RootObject =
                 JsonConvert.DeserializeObject<Face_RootObject[]>(jsonResponse);
 
@@ -195,7 +196,7 @@ public class FaceAnalysis : MonoBehaviour {
 
         using (UnityWebRequest www = UnityWebRequest.Post(detectFacesEndpoint, webForm))
         {
-            www.SetRequestHeader("Ocp-Apim-Subscription-Key", key);
+            www.SetRequestHeader("Ocp-Apim-Subscription-Key", azureKey);
             www.SetRequestHeader("Content-Type", "application/json");
             www.uploadHandler.contentType = "application/json";
             www.uploadHandler = new UploadHandlerRaw(facesData);
@@ -227,7 +228,7 @@ public class FaceAnalysis : MonoBehaviour {
 
         using (UnityWebRequest www = UnityWebRequest.Get(getGroupEndpoint))
         {
-            www.SetRequestHeader("Ocp-Apim-Subscription-Key", key);
+            www.SetRequestHeader("Ocp-Apim-Subscription-Key", azureKey);
             www.downloadHandler = new DownloadHandlerBuffer();
             yield return www.SendWebRequest();
             string jsonResponse = www.downloadHandler.text;
