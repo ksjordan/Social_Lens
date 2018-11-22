@@ -40,12 +40,12 @@ public class FaceAnalysis : MonoBehaviour {
     /// <summary>
     /// Auth key of Face Recognition Service
     /// </summary>
-    private const string azureKey = "69e550a6bafc449b8f90bb2c56e5d846";
+    private const string azureKey = "69e550a6bafc449b8f90bb2c56e5d846";//"abbd309cfe8a4f8393713f14fefbfe42";////
 
     /// <summary>
     /// Id (name) of the created person group 
     /// </summary>
-    private const string personGroupId = "sociallens";
+    private const string personGroupId = "maketwitter";//"sociallens";//
 
     //Twitter variables
     private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
@@ -238,8 +238,9 @@ public class FaceAnalysis : MonoBehaviour {
 
             // Display the name of the person in the UI
             labelText.text = identifiedPerson_RootObject.name;
-
-
+            //labelText.text = identifiedPerson_RootObject.userData;
+            LoadTwitterContent(identifiedPerson_RootObject.userData);
+            /*
             switch(identifiedPerson_RootObject.name)
             {
                 case "Christin Carter":
@@ -263,7 +264,8 @@ public class FaceAnalysis : MonoBehaviour {
                 case "HariKrishna Prabhu":
                     LoadTwitterContent("realDonaldTrump");
                     break;
-            }
+                    
+            }*/
         }
     }
 }
@@ -319,6 +321,7 @@ public class IdentifiedPerson_RootObject
 {
     public string personId { get; set; }
     public string name { get; set; }
+    public string userData { get; set; }
 }
 
 
