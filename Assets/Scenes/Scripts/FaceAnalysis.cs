@@ -46,7 +46,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// Id (name) of the created person group 
     /// </summary>
     private const string personGroupId = "maketwitter";//"sociallens";//
-
+    public string[] handles;
     //Twitter variables
     private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
     private string secret = "TINPY6L5pWFAW3zFKQz2T9WymDa1jVQD2az3Ym98eVgsPB43kI";
@@ -238,8 +238,9 @@ public class FaceAnalysis : MonoBehaviour {
 
             // Display the name of the person in the UI
             labelText.text = identifiedPerson_RootObject.name;
+            handles = identifiedPerson_RootObject.userData.Split('|');
             //labelText.text = identifiedPerson_RootObject.userData;
-            LoadTwitterContent(identifiedPerson_RootObject.userData);
+            LoadTwitterContent(handles[0]);
             /*
             switch(identifiedPerson_RootObject.name)
             {
@@ -322,6 +323,7 @@ public class IdentifiedPerson_RootObject
     public string personId { get; set; }
     public string name { get; set; }
     public string userData { get; set; }
+    //public string[] handles;
 }
 
 
