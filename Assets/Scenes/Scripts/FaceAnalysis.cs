@@ -9,6 +9,8 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using HoloToolkit.UX.Dialog;
+using HtmlAgilityPack;
+using SimpleJSON;
 
 public class FaceAnalysis : MonoBehaviour {
 
@@ -47,6 +49,11 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     private const string personGroupId = "maketwitter";//"sociallens";//
 
+    /// <summary>
+    /// Rendering photos on this game object
+    /// </summary>
+    public GameObject igObject;
+
     //Twitter variables
     private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
     private string secret = "TINPY6L5pWFAW3zFKQz2T9WymDa1jVQD2az3Ym98eVgsPB43kI";
@@ -68,6 +75,8 @@ public class FaceAnalysis : MonoBehaviour {
 
         // Create the text label in the scene
         CreateLabel();
+
+        LoadInstagramContent("carternation_");
     }
 
     private void LoadTwitterContent(string twitterHandle)
@@ -95,6 +104,48 @@ public class FaceAnalysis : MonoBehaviour {
         else
         {
             Debug.Log("Access Token is NULL!");
+        }
+    }
+
+    /// <summary>
+    /// Load instagram content
+    /// </summary>
+    private void LoadInstagramContent(string igHandle) 
+    {
+        const string igReq = "www.instagram.com/carternation_";
+        WWW request = new WWW(igReq);
+        StartCoroutine(OnResponse(request));
+    }
+
+    private IEnumerator OnResponse(WWW req) {
+        yield return req;
+        var htmlDoc = new HtmlDocument();
+        htmlDoc.LoadHtml(req.text);
+        var nodes = htmlDoc.DocumentNode
+           .SelectNodes("//script[@type='text/javascript']");
+
+        var jsonString = nodes[3].ChildNodes[0].InnerHtml;
+        var jsonObj = JSON.Parse(jsonString.Substring(21));
+        var subIndex = jsonObj["entry_data"]["ProfilePage"][0];
+        var stringPhotos = subIndex["graphql"]["user"]["edge_owner_to_timeline_media"]["count"].Value;
+        var realIndex = subIndex["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"];
+
+        int numOfPhotos = int.Parse(stringPhotos);
+        for(int i = 0; i < 1; i++) {
+            Debug.Log(realIndex[i]["node"]["display_url"].Value);
+            StartCoroutine(DownloadIGImage(realIndex[i]["node"]["display_url"].Value));
+        }
+    }
+
+
+    private IEnumerator DownloadIGImage(string url) {
+        using (WWW igImage = new WWW(url)) 
+        {
+            Texture2D tex;
+            tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
+            yield return igImage;
+            igImage.LoadImageIntoTexture(tex);
+            igObject.GetComponent<Renderer>().material.mainTexture = tex;
         }
     }
 
@@ -240,6 +291,8 @@ public class FaceAnalysis : MonoBehaviour {
             labelText.text = identifiedPerson_RootObject.name;
             //labelText.text = identifiedPerson_RootObject.userData;
             LoadTwitterContent(identifiedPerson_RootObject.userData);
+
+            LoadInstagramContent("carternation_");
             /*
             switch(identifiedPerson_RootObject.name)
             {
