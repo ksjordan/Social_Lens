@@ -11,6 +11,7 @@ using UnityEngine.Networking;
 using HoloToolkit.UX.Dialog;
 using HtmlAgilityPack;
 using SimpleJSON;
+using System.Text.RegularExpressions;
 
 public class FaceAnalysis : MonoBehaviour {
 
@@ -119,21 +120,12 @@ public class FaceAnalysis : MonoBehaviour {
 
     private IEnumerator OnResponse(WWW req) {
         yield return req;
-        var htmlDoc = new HtmlDocument();
-        htmlDoc.LoadHtml(req.text);
-        var nodes = htmlDoc.DocumentNode
-           .SelectNodes("//script[@type='text/javascript']");
+        Regex rgx = new Regex(@"https?:\/\/(scontent-lax3)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
+        MatchCollection matches = rgx.Matches(req.text);
 
-        var jsonString = nodes[3].ChildNodes[0].InnerHtml;
-        var jsonObj = JSON.Parse(jsonString.Substring(21));
-        var subIndex = jsonObj["entry_data"]["ProfilePage"][0];
-        var stringPhotos = subIndex["graphql"]["user"]["edge_owner_to_timeline_media"]["count"].Value;
-        var realIndex = subIndex["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"];
-
-        int numOfPhotos = int.Parse(stringPhotos);
-        for(int i = 0; i < 1; i++) {
-            Debug.Log(realIndex[i]["node"]["display_url"].Value);
-            StartCoroutine(DownloadIGImage(realIndex[i]["node"]["display_url"].Value));
+        for(int i = 3; i < 4; i++) {
+            CaptureCollection captures = matches[i].Captures;
+            StartCoroutine(DownloadIGImage(captures[0].Value));
         }
     }
 
