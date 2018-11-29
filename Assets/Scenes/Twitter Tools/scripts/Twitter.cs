@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Networking;
 
 //For use interacting with the Twitter API
 namespace Twitter
@@ -193,34 +195,69 @@ namespace Twitter
 		//Authorization set-up
 		public static string GetTwitterAccessToken (string consumerKey, string consumerSecret)
 		{
-			//Convert the consumer key and secret strings into a format to be added to our header
-			string URL_ENCODED_KEY_AND_SECRET = Convert.ToBase64String(Encoding.UTF8.GetBytes(consumerKey + ":" + consumerSecret));
+            //Convert the consumer key and secret strings into a format to be added to our header
+            string URL_ENCODED_KEY_AND_SECRET = Convert.ToBase64String(Encoding.UTF8.GetBytes(consumerKey + ":" + consumerSecret));
 
-			byte[] body;
-			body = Encoding.UTF8.GetBytes("grant_type=client_credentials");
+            byte[] body;
+            body = Encoding.UTF8.GetBytes("grant_type=client_credentials");
 
-			Dictionary<string, string> headers = new Dictionary<string, string> ();
-			headers ["Authorization"] = "Basic " + URL_ENCODED_KEY_AND_SECRET;
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["Authorization"] = "Basic " + URL_ENCODED_KEY_AND_SECRET;
 
-			//Send a request to the Twitter API for an access token
-			WWW web = new WWW ("https://api.twitter.com/oauth2/token", body, headers);
-			while (!web.isDone) {
-				Debug.Log("Retrieving access token...");
-			}
-			if (web.error != null) {
-				//If there was a problem with the request, output the error to the debug log
-				Debug.Log("Web error: " + web.error);
-			}
-			else {
-				Debug.Log("Access token retrieved successfully");
-				//Format string response into something more useable.
-				string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"","");
-				output = output.Replace("\"}","");
-				return output;
-			}
-			//In the event of failure
-			return null;
-		}
+            //Send a request to the Twitter API for an access token
+            WWW web = new WWW("https://api.twitter.com/oauth2/token", body, headers);
+            while (!web.isDone)
+            {
+                Debug.Log("Retrieving access token...");
+            }
+            if (web.error != null)
+            {
+                //If there was a problem with the request, output the error to the debug log
+                Debug.Log("Web error: " + web.error);
+            }
+            else
+            {
+                Debug.Log("Access token retrieved successfully");
+                //Format string response into something more useable.
+                string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
+                output = output.Replace("\"}", "");
+                return output;
+            }
+            //In the event of failure
+            return null;
+        }
+
+        public IEnumerator GetAccessToken(string consumerKey, string consumerSecret)
+        {
+            //Convert the consumer key and secret strings into a format to be added to our header
+            string URL_ENCODED_KEY_AND_SECRET = Convert.ToBase64String(Encoding.UTF8.GetBytes(consumerKey + ":" + consumerSecret));
+
+            byte[] body;
+            body = Encoding.UTF8.GetBytes("grant_type=client_credentials");
+
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["Authorization"] = "Basic " + URL_ENCODED_KEY_AND_SECRET;
+
+            //Send a request to the Twitter API for an access token
+            using (UnityWebRequest web = UnityWebRequest.Put("https://api.twitter.com/oauth2/token", body))
+            {
+                yield return web.SendWebRequest();
+                if (web.isNetworkError || web.isHttpError)
+                {
+                    Debug.Log("New web error:" + web.error);
+                }
+                else
+                {
+                    Debug.Log("Access token retrieved successfully");
+                    //Format string response into something more useable.
+                    Debug.Log("Before: " + web.downloadHandler.text);
+                    string output = web.downloadHandler.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
+                    output = output.Replace("\"}", "");
+                    Debug.Log("Token: " + output);
+                }
+            }
+
+        }
 
 		#endregion
 

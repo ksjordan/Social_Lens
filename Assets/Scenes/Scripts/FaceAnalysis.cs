@@ -50,13 +50,12 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     private const string personGroupId = "maketwitter";//"sociallens";//
 
-    /// <summary>
-    /// Rendering photos on this game object
-    /// </summary>
-    public GameObject igObject;
+    public GameObject tweetUI;
+    public GameObject instaUI;
 
     public Canvas mainCanvas;
     public GameObject instagramUIPrefab;
+    public GameObject twitterUIPrefab;
 
     public string[] handles;
     //Twitter variables
@@ -80,7 +79,7 @@ public class FaceAnalysis : MonoBehaviour {
 
         // Create the text label in the scene
         CreateLabel();
-
+        //LoadTwitterContent("cartercorpp");
     }
 
     private void LoadTwitterContent(string twitterHandle)
@@ -101,8 +100,21 @@ public class FaceAnalysis : MonoBehaviour {
 
             for (int i = 0; i < tweets.Length; i++)
             {
-                Debug.Log("Generating new Dialog game object");
-                //Dialog dialog = Dialog.Open(dialogPrefab.gameObject, DialogButtonType.Close, tweets[i].user.screen_name, tweets[i].text);
+                Debug.Log("Generating new tweet object");
+                RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
+                Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
+                Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
+                Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
+                Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
+                Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
+                Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
+
+                fullName.text = newUser.name;
+                handle.text = newUser.screen_name;
+                body.text = tweets[i].text;
+                date.text = tweets[i].created_at;
+                retweet.text = tweets[i].retweet_count.ToString();
+                likes.text = tweets[i].favorite_count.ToString();
             }
         }
         else
@@ -291,35 +303,66 @@ public class FaceAnalysis : MonoBehaviour {
             // Display the name of the person in the UI
             labelText.text = identifiedPerson_RootObject.name;
             handles = identifiedPerson_RootObject.userData.Split('|');
-            LoadTwitterContent(handles[0]);
 
-            LoadInstagramContent(handles[1]);
-            /*
-            switch(identifiedPerson_RootObject.name)
+            //LoadInstagramContent(handles[1]);
+            //LoadTwitterContent(handles[0]);
+            Texture2D tex;
+            RawImage instaPic = instaUI.GetComponent<RawImage>();
+            RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
+            Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
+            Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
+            Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
+            Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
+            Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
+            Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
+
+            switch (handles[0])
             {
-                case "Christin Carter":
-                    LoadTwitterContent("cartercorpp");
+                case "cartercorpp":
+                    fullName.text = "Christin Carter";
+                    handle.text = "@cartercorpp";
+                    body.text = "Hello Twitter! #myfirstTweet";
+                    date.text = "12:44 AM - 29 Nov 2018";
+                    retweet.text = "0";
+                    likes.text = "0";
+                    tex = Resources.Load("Images/ChrisPic") as Texture2D;
+                    instaPic.texture = tex;
                     break;
-                case "Renu Hiremath":
+                case "renu__hiremath":
                     LoadTwitterContent("renu__hiremath");
                     break;
-                case "Yoofi Quansah":
-                    LoadTwitterContent("yquansah_");
+                case "yquansah_":
+                    fullName.text = "Yoofi Quansah";
+                    handle.text = "@yquansah_";
+                    body.text = "There’s really people salty we got lebron 😂😂😂😂 that’s amazing. Take your hate somewhere else bro we don’t need that in LA. We got the best player in the world fam WE LIVE #Showtime";
+                    date.text = "5:36 PM - 1 Jul 2018";
+                    retweet.text = "1";
+                    likes.text = "7";
+                    tex = Resources.Load("Images/YoofiPic") as Texture2D;
+                    instaPic.texture = tex;
                     break; 
-                case "Savitha Sameerdas":
-                    LoadTwitterContent("savithasameer");
+                case "savithasameer":
+                    fullName.text = "Savitha Sameerdas";
+                    handle.text = "@SavithaSameer";
+                    body.text = "#vmwarecodehouse #serverless #STEM Amazing weekend indeed!";
+                    date.text = "10:28 PM - 30 Jul 2018";
+                    retweet.text = "1";
+                    likes.text = "1";
+                    tex = Resources.Load("Images/SavithaPic") as Texture2D;
+                    instaPic.texture = tex;
                     break;
-                case "Ganesh Ram":
-                    LoadTwitterContent("BBC");
-                    break;
-                case "Kristin Jordan":
-                    LoadTwitterContent("kjcookies");
-                    break;
-                case "HariKrishna Prabhu":
-                    LoadTwitterContent("realDonaldTrump");
+                case "kjcookies":
+                    fullName.text = "Kristin Jordan";
+                    handle.text = "@kjcookies";
+                    body.text = "Woah";
+                    date.text = "8:04 AM - 29 Nov 2018";
+                    retweet.text = "0";
+                    likes.text = "0";
+                    tex = Resources.Load("Images/KristinPic") as Texture2D;
+                    instaPic.texture = tex;
                     break;
                     
-            }*/
+            }
         }
     }
 }
