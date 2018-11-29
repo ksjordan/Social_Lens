@@ -9,9 +9,9 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using HoloToolkit.UX.Dialog;
-using HtmlAgilityPack;
 using SimpleJSON;
 using System.Text.RegularExpressions;
+using UnityEngine.UI;
 
 public class FaceAnalysis : MonoBehaviour {
 
@@ -55,6 +55,9 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     public GameObject igObject;
 
+    public Canvas mainCanvas;
+    public GameObject instagramUIPrefab;
+
     //Twitter variables
     private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
     private string secret = "TINPY6L5pWFAW3zFKQz2T9WymDa1jVQD2az3Ym98eVgsPB43kI";
@@ -77,7 +80,6 @@ public class FaceAnalysis : MonoBehaviour {
         // Create the text label in the scene
         CreateLabel();
 
-        LoadInstagramContent("carternation_");
     }
 
     private void LoadTwitterContent(string twitterHandle)
@@ -88,7 +90,7 @@ public class FaceAnalysis : MonoBehaviour {
         if (accessToken != null)
         {
             newUser = Twitter.API.GetProfileInfo(twitterHandle, accessToken, false);
-            tweets = Twitter.API.GetUserTimeline(twitterHandle, 6, accessToken);
+            tweets = Twitter.API.GetUserTimeline(twitterHandle, 1, accessToken);
 
             if (newUser == null || tweets == null)
             {
@@ -96,10 +98,10 @@ public class FaceAnalysis : MonoBehaviour {
                 return;
             }
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < tweets.Length; i++)
             {
                 Debug.Log("Generating new Dialog game object");
-                Dialog dialog = Dialog.Open(dialogPrefab.gameObject, DialogButtonType.Next | DialogButtonType.Close, tweets[i].user.screen_name, tweets[i].text);
+                //Dialog dialog = Dialog.Open(dialogPrefab.gameObject, DialogButtonType.Close, tweets[i].user.screen_name, tweets[i].text);
             }
         }
         else
@@ -113,7 +115,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     private void LoadInstagramContent(string igHandle) 
     {
-        const string igReq = "www.instagram.com/carternation_";
+        string igReq = "www.instagram.com/" + igHandle;
         WWW request = new WWW(igReq);
         StartCoroutine(OnResponse(request));
     }
@@ -137,7 +139,13 @@ public class FaceAnalysis : MonoBehaviour {
             tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
             yield return igImage;
             igImage.LoadImageIntoTexture(tex);
-            igObject.GetComponent<Renderer>().material.mainTexture = tex;
+
+            Debug.Log("Instantiating the Insta post prefab");
+
+            GameObject instaObject = Instantiate(instagramUIPrefab, mainCanvas.transform);
+            instaObject.GetComponent<RawImage>().texture = tex;
+
+            Debug.Log("Successfully set texture");
         }
     }
 
@@ -281,10 +289,10 @@ public class FaceAnalysis : MonoBehaviour {
 
             // Display the name of the person in the UI
             labelText.text = identifiedPerson_RootObject.name;
-            //labelText.text = identifiedPerson_RootObject.userData;
-            LoadTwitterContent(identifiedPerson_RootObject.userData);
+            string[] handles = identifiedPerson_RootObject.userData.Split('|');
+            LoadTwitterContent(handles[0]);
 
-            LoadInstagramContent("carternation_");
+            LoadInstagramContent(handles[1]);
             /*
             switch(identifiedPerson_RootObject.name)
             {

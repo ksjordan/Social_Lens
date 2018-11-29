@@ -263,15 +263,26 @@ namespace Twitter
             Debug.Log("JSON response: " + s);
 			TwitterUser output = JsonUtility.FromJson<TwitterUser>(s);
 			if (output != null) {
-				output.FormatCreationTime();
-				if (output.status.created_at != null) {
-					output.status.FormatCreationTime();
-                    if(output.status.retweeted)
+                Debug.Log("WHERE: ");
+                output.FormatCreationTime();
+                if(output.statuses_count > 0)
+                {
+                    if (output.status.created_at != null)
                     {
-                        if (output.status.retweeted_status.created_at != null)
-                            output.status.retweeted_status.FormatCreationTime();
+                        Debug.Log("ART: ");
+                        output.status.FormatCreationTime();
+                        if (output.status.retweeted)
+                        {
+                            if (output.status.retweeted_status.created_at != null)
+                            {
+                                Debug.Log("THOU: ");
+                                output.status.retweeted_status.FormatCreationTime();
+                            }
+
+                        }
                     }
-				}
+                }
+				
 				if (output.screen_name == " ")
 					output.screen_name = "Somebody with a non-ascii name";
 				Debug.Log(output.screen_name + " profile retrieved");
