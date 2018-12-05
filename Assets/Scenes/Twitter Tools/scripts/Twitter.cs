@@ -204,25 +204,49 @@ namespace Twitter
             Dictionary<string, string> headers = new Dictionary<string, string>();
             headers["Authorization"] = "Basic " + URL_ENCODED_KEY_AND_SECRET;
 
-            //Send a request to the Twitter API for an access token
-            WWW web = new WWW("https://api.twitter.com/oauth2/token", body, headers);
-            while (!web.isDone)
+            WWWForm form = new WWWForm();
+            form.AddField("grant_type", "client_credentials");
+
+            UnityWebRequest request = UnityWebRequest.Post("https://api.twitter.com/oauth2/token", form);
+            request.SetRequestHeader("Authorization", headers["Authorization"]);
+            request.SendWebRequest();
+            while(!request.isDone)
             {
-                Debug.Log("Retrieving access token...");
+                Debug.Log("Get the fucking token");
             }
-            if (web.error != null)
+            if(request.error != null)
             {
-                //If there was a problem with the request, output the error to the debug log
-                Debug.Log("Web error: " + web.error);
-            }
-            else
+                Debug.Log("Error my guy: " + request.error);
+            } else
             {
-                Debug.Log("Access token retrieved successfully");
-                //Format string response into something more useable.
-                string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
+                string output = request.downloadHandler.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
                 output = output.Replace("\"}", "");
+                Debug.Log("Got emmmm: " + output);
                 return output;
             }
+            Debug.Log("Woowwwww: " + request.downloadHandler.text);
+
+
+            ////Send a request to the Twitter API for an access token
+            //WWW web = new WWW("https://api.twitter.com/oauth2/token", body, headers);
+            //while (!web.isDone)
+            //{
+            //    Debug.Log("Retrieving access token...");
+            //}
+            //if (web.error != null)
+            //{
+            //    //If there was a problem with the request, output the error to the debug log
+            //    Debug.Log("Web error: " + web.error);
+            //    Debug.Log("Headers: " + web.text);
+            //}
+            //else
+            //{
+            //    Debug.Log("Access token retrieved successfully");
+            //    //Format string response into something more useable.
+            //    string output = web.text.Replace("{\"token_type\":\"bearer\",\"access_token\":\"", "");
+            //    output = output.Replace("\"}", "");
+            //    return output;
+            //}
             //In the event of failure
             return null;
         }
