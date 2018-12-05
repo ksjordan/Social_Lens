@@ -356,8 +356,6 @@ MonoBehaviour:
   twitterUIPrefab: {fileID: 1361751868214208, guid: 86e1b7108146dc64c9bb5f6db70a8a8c,
     type: 2}
   handles: []
-  dialogPrefab: {fileID: 114617495383521140, guid: 675f0fa1333683640974b1e6c078079e,
-    type: 2}
 --- !u!1 &397540685
 GameObject:
   m_ObjectHideFlags: 0
