@@ -13,8 +13,8 @@ using SimpleJSON;
 using System.Text.RegularExpressions;
 using UnityEngine.UI;
 
-public class FaceAnalysis : MonoBehaviour {
 
+public class FaceAnalysis : MonoBehaviour {
     /// <summary>
     /// Allows this class to behave like a singleton
     /// </summary>
@@ -24,6 +24,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// The analysis result text
     /// </summary>
     private TextMesh labelText;
+    public int texnum = 1;
 
     /// <summary>
     /// Bytes of the image captured with camera
@@ -175,12 +176,12 @@ public class FaceAnalysis : MonoBehaviour {
 
         // Resize and position the new cursor
         newLabel.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-        newLabel.transform.position = new Vector3(0f, 3f, 60f);
+        newLabel.transform.position = new Vector3(-16f, 9f, 60f);
 
         // Creating the text of the Label
         labelText = newLabel.AddComponent<TextMesh>();
-        labelText.anchor = TextAnchor.MiddleCenter;
-        labelText.alignment = TextAlignment.Center;
+        labelText.anchor = TextAnchor.UpperLeft;
+        labelText.alignment = TextAlignment.Left;
         labelText.tabSize = 4;
         labelText.fontSize = 50;
         labelText.text = ".";
@@ -287,6 +288,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     internal IEnumerator GetPerson(string personId)
     {
+        InvokeRepeating("LaunchProjectile", 0f, 5f);
         string getGroupEndpoint = $"{baseEndpoint}persongroups/{personGroupId}/persons/{personId}?";
         WWWForm webForm = new WWWForm();
 
@@ -306,7 +308,7 @@ public class FaceAnalysis : MonoBehaviour {
 
             //LoadInstagramContent(handles[1]);
             //LoadTwitterContent(handles[0]);
-            Texture2D tex;
+            /*Texture2D tex;
             RawImage instaPic = instaUI.GetComponent<RawImage>();
             RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
             Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
@@ -358,11 +360,187 @@ public class FaceAnalysis : MonoBehaviour {
                     date.text = "8:04 AM - 29 Nov 2018";
                     retweet.text = "0";
                     likes.text = "0";
-                    tex = Resources.Load("Images/KristinPic") as Texture2D;
-                    instaPic.texture = tex;
+                    Debug.Log(texnum);
+                    if (texnum == 1)
+                    {
+                        tex = Resources.Load("Images/KristinPic") as Texture2D;
+                        instaPic.texture = tex;
+                    }
+                    else if (texnum == 2)
+                    {
+                        tex = Resources.Load("Images/KristinPic2") as Texture2D;
+                        instaPic.texture = tex;
+                    }
+                    else if (texnum == 3)
+                    {
+                        tex = Resources.Load("Images/KristinPic3") as Texture2D;
+                        instaPic.texture = tex;
+                    }
+                    else if (texnum == 4)
+                    {
+                        tex = Resources.Load("Images/KristinPic4") as Texture2D;
+                        instaPic.texture = tex;
+                    }
+                    else if (texnum == 5)
+                    {
+                        tex = Resources.Load("Images/KristinPic5") as Texture2D;
+                        instaPic.texture = tex;
+                    }
+                    //tex = Resources.Load("Images/KristinPic") as Texture2D;
+                    //instaPic.texture = tex;
                     break;
                     
-            }
+            }*/
+        }
+    }
+    public void LaunchProjectile()
+    {
+        Texture2D tex;
+        RawImage instaPic = instaUI.GetComponent<RawImage>();
+        RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
+        Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
+        Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
+        Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
+        Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
+        Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
+        Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
+
+        switch (handles[0])
+        {
+            case "cartercorpp":
+                fullName.text = "Christin Carter";
+                handle.text = "@cartercorpp";
+                body.text = "Hello Twitter! #myfirstTweet";
+                date.text = "12:44 AM - 29 Nov 2018";
+                retweet.text = "0";
+                likes.text = "0";
+                if (texnum == 1)
+                {
+                    tex = Resources.Load("Images/ChrisPic") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 2)
+                {
+                    tex = Resources.Load("Images/ChrisPic2") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 3)
+                {
+                    tex = Resources.Load("Images/ChrisPic3") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 4)
+                {
+                    tex = Resources.Load("Images/ChrisPic4") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 5)
+                {
+                    tex = Resources.Load("Images/ChrisPic5") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                break;
+            case "renu__hiremath":
+                LoadTwitterContent("renu__hiremath");
+                if (texnum == 1)
+                {
+                    tex = Resources.Load("Images/RenuPic") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 2)
+                {
+                    tex = Resources.Load("Images/RenuPic2") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 3)
+                {
+                    tex = Resources.Load("Images/RenuPic3") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 4)
+                {
+                    tex = Resources.Load("Images/RenuPic4") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 5)
+                {
+                    tex = Resources.Load("Images/RenuPic5") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                break;
+            case "yquansah_":
+                fullName.text = "Yoofi Quansah";
+                handle.text = "@yquansah_";
+                body.text = "There’s really people salty we got lebron 😂😂😂😂 that’s amazing. Take your hate somewhere else bro we don’t need that in LA. We got the best player in the world fam WE LIVE #Showtime";
+                date.text = "5:36 PM - 1 Jul 2018";
+                retweet.text = "1";
+                likes.text = "7";
+                tex = Resources.Load("Images/YoofiPic") as Texture2D;
+                instaPic.texture = tex;
+                break;
+            case "savithasameer":
+                fullName.text = "Savitha Sameerdas";
+                handle.text = "@SavithaSameer";
+                body.text = "#vmwarecodehouse #serverless #STEM Amazing weekend indeed!";
+                date.text = "10:28 PM - 30 Jul 2018";
+                retweet.text = "1";
+                likes.text = "1";
+                tex = Resources.Load("Images/SavithaPic") as Texture2D;
+                instaPic.texture = tex;
+                break;
+            case "kjcookies":
+                fullName.text = "Kristin Jordan";
+                handle.text = "@kjcookies";
+                //body.text = "Woah";
+                //date.text = "8:04 AM - 29 Nov 2018";
+                //retweet.text = "0";
+                //likes.text = "0";
+                Debug.Log(texnum);
+                if (texnum == 1)
+                {
+                    body.text = "Woah";
+                    date.text = "8:04 AM - 29 Nov 2018";
+                    retweet.text = "0";
+                    likes.text = "0";
+                    tex = Resources.Load("Images/KristinPic") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 2)
+                {
+                    body.text = "WATCH: #Hyolyn Turns Heads In Sexy “Dally” MV Featuring Gray https://www.soompi.com/2018/04/23/watch-hyolyn-turns-heads-sexy-dally-mv-featuring-gray/ …";
+                    date.text = "2:09 AM - 23 Apr 2018";
+                    retweet.text = "0";
+                    likes.text = "0";
+                    tex = Resources.Load("Images/KristinPic2") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 3)
+                {
+                    tex = Resources.Load("Images/KristinPic3") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 4)
+                {
+                    tex = Resources.Load("Images/KristinPic4") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                else if (texnum == 5)
+                {
+                    tex = Resources.Load("Images/KristinPic5") as Texture2D;
+                    instaPic.texture = tex;
+                }
+                //tex = Resources.Load("Images/KristinPic") as Texture2D;
+                //instaPic.texture = tex;
+                break;
+
+        }
+        if (texnum == 5)
+        {
+            texnum = 1;
+        }
+        else
+        {
+            texnum += 1;
         }
     }
 }
