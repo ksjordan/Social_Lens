@@ -2,14 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using UnityEngine;
 using UnityEngine.Networking;
-using HoloToolkit.UX.Dialog;
-using SimpleJSON;
 using System.Text.RegularExpressions;
 using UnityEngine.UI;
 
@@ -51,14 +46,14 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     private const string personGroupId = "maketwitter";//"sociallens";//
 
+    public GameObject ui;
     public GameObject tweetUI;
     public GameObject instaUI;
+    public GameObject instaProfileUI;
 
     public Canvas mainCanvas;
-    public GameObject instagramUIPrefab;
-    public GameObject twitterUIPrefab;
 
-    public string[] handles;
+    private string[] handles;
 
     //Instagram variables
     const int SKIP = 7;
@@ -66,6 +61,8 @@ public class FaceAnalysis : MonoBehaviour {
     private string instaProfilePic;
     private string[] postUrls;
     private int instaIndex;
+    private Texture2D instaProfile;
+    private Texture2D[] instaImages;
 
     //Twitter variables
     private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
@@ -90,6 +87,7 @@ public class FaceAnalysis : MonoBehaviour {
 
         // Create the text label in the scene
         CreateLabel();
+        
     }
 
     private void LoadTwitterContent(string twitterHandle)
@@ -100,37 +98,59 @@ public class FaceAnalysis : MonoBehaviour {
         if (accessToken != null)
         {
             newUser = Twitter.API.GetProfileInfo(twitterHandle, accessToken, false);
-            tweets = Twitter.API.GetUserTimeline(twitterHandle, 1, accessToken);
+            tweets = Twitter.API.GetUserTimeline(twitterHandle, 5, accessToken);
 
             if (newUser == null || tweets == null)
             {
                 Debug.Log("User or Tweets is null");
                 return;
             }
-
-            for (int i = 0; i < tweets.Length; i++)
-            {
-                Debug.Log("Generating new tweet object");
-                RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
-                Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
-                Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
-                Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
-                Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
-                Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
-                Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
-
-                fullName.text = newUser.name;
-                handle.text = newUser.screen_name;
-                body.text = tweets[i].text;
-                date.text = tweets[i].created_at;
-                retweet.text = tweets[i].retweet_count.ToString();
-                likes.text = tweets[i].favorite_count.ToString();
-            }
+            twitterIndex = 0;
+            Debug.Log("twitter image url: " + newUser.profile_image_url);
+            StartCoroutine(DownloadTwitterImage(newUser.profile_image_url));
+            InvokeRepeating("DisplayTweet", 0f, 5f);
         }
         else
         {
             Debug.Log("Access Token is NULL!");
         }
+    }
+
+    IEnumerator DownloadTwitterImage(string url)
+    {
+        using (WWW twitterImage = new WWW(url))
+        {
+            Texture2D tex;
+            tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
+            yield return twitterImage;
+            twitterImage.LoadImageIntoTexture(tex);
+
+            tweetUI.transform.GetChild(0).GetComponent<RawImage>().texture = tex;
+        }
+    }
+
+    private void DisplayTweet()
+    {
+        if(tweets != null)
+        {
+            RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
+            Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
+            Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
+            Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
+            Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
+            Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
+            Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
+
+            fullName.text = newUser.name;
+            handle.text = "@" + newUser.screen_name;
+            body.text = tweets[twitterIndex].text;
+            date.text = tweets[twitterIndex].created_at;
+            retweet.text = tweets[twitterIndex].retweet_count.ToString();
+            likes.text = tweets[twitterIndex].favorite_count.ToString();
+
+            twitterIndex = twitterIndex >= tweets.Length - 1 ? 0 : twitterIndex + 1;
+        }
+        
     }
 
     /// <summary>
@@ -150,17 +170,43 @@ public class FaceAnalysis : MonoBehaviour {
         {
             Debug.Log("Error: " + req.error);
         }
-        Regex rgx = new Regex(@"https?:\/\/(scontent-lax3)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
-        MatchCollection matches = rgx.Matches(req.text);
+        Regex rgx = new Regex(@"https?:\/\/(scontent-lax3)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");     
+        Regex followersRrgx = new Regex(@"[0-9]+ Followers");
+        Regex followingRgx = new Regex(@"[0-9]+ Following");
 
+        MatchCollection matches = rgx.Matches(req.text);
+        MatchCollection followersMatches = followersRrgx.Matches(req.text);
+        MatchCollection followingMatches = followingRgx.Matches(req.text);
+
+        //Debug.Log("followers: " + followersMatches[0].Captures[0].Value);
+        //Debug.Log("following: " + followingMatches[0].Captures[0].Value);
         Debug.Log("Matches size: " + matches.Count);
+
+        if(matches.Count > 0 )
+        {
+            instaProfilePic = matches[0].Captures[0].Value;
+            StartCoroutine(DownloadIGImage(instaProfilePic, 0));
+        }
+
+        if(followersMatches.Count > 0 )
+        {
+            string followers = followersMatches[0].Captures[0].Value;
+            followers = followers.Substring(0, followers.Length - " Followers".Length);
+
+            string following = followingMatches[0].Captures[0].Value;
+            following = following.Substring(0, following.Length - " Following".Length);
+
+            instaProfileUI.transform.GetChild(2).GetComponent<Text>().text = following;
+            instaProfileUI.transform.GetChild(3).GetComponent<Text>().text = followers;
+        }
         
         int numPosts = matches.Count >= (SKIP * MAX_POSTS + 3) ? MAX_POSTS : (matches.Count - 3) / SKIP;
-        postUrls = new string[numPosts + 1];
+        postUrls = new string[numPosts];
+        instaImages = new Texture2D[numPosts];
         Debug.Log("Num posts: " + numPosts);
 
         //First image is always the profile pic
-        instaProfilePic = matches[0].Captures[0].Value;
+        
 
         //for (int i = 0; i < matches.Count; i++)
         //{
@@ -169,39 +215,54 @@ public class FaceAnalysis : MonoBehaviour {
         //    //StartCoroutine(DownloadIGImage(captures[0].Value));
         //}
 
+        instaIndex = 0;
+
         //Create list of instagram URLs
         for (int i = 0; i < numPosts; i++)
         {
             CaptureCollection captures = matches[(i * SKIP) + 3].Captures;
             postUrls[i] = captures[0].Value;
             Debug.Log("added pic: " + postUrls[i]);
+            StartCoroutine(DownloadIGImage(postUrls[i], i));
         }
-        instaIndex = 0;
-        InvokeRepeating("DisplayInstaPic", 0f, 5f);
+        
+        if(numPosts > 0)
+        {
+            InvokeRepeating("DisplayInstaPic", 0f, 5f);
+        }
     }
 
     private void DisplayInstaPic()
     {
-        StartCoroutine(DownloadIGImage(postUrls[instaIndex]));
-        instaIndex = instaIndex >= postUrls.Length - 1 ? 1 : instaIndex + 1;
-
+        if(instaImages[instaIndex] != null)
+        {
+            instaUI.GetComponent<RawImage>().texture = instaImages[instaIndex];
+        }
+        
+        instaIndex = instaIndex >= postUrls.Length - 1 ? 0 : instaIndex + 1;
+        //StartCoroutine(DownloadIGImage(postUrls[instaIndex]));
     }
 
-    private IEnumerator DownloadIGImage(string url) {
+    private IEnumerator DownloadIGImage(string url, int index) {
         using (WWW igImage = new WWW(url)) 
         {
             Texture2D tex;
             tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
             yield return igImage;
             igImage.LoadImageIntoTexture(tex);
+            instaImages[index] = tex;
 
-            Debug.Log("Instantiating the Insta post prefab");
+            if(index == 0)
+            {
+                instaProfile = tex;
+                instaProfileUI.transform.GetChild(0).GetComponent<RawImage>().texture = tex;
+            }
 
             //GameObject instaObject = Instantiate(instagramUIPrefab, mainCanvas.transform);
-            instaUI.GetComponent<RawImage>().texture = tex;
+            //instaUI.GetComponent<RawImage>().texture = tex;
 
-            Debug.Log("Successfully set texture");
-            instaIndex = instaIndex >= postUrls.Length - 1 ? 0 : instaIndex + 1;
+            //Debug.Log("Successfully set texture");
+            //instaIndex = instaIndex >= postUrls.Length - 1 ? 0 : instaIndex + 1;
         }
     }
 
@@ -234,6 +295,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     internal IEnumerator DetectFacesFromImage()
     {
+        ui.SetActive(false);
         WWWForm webForm = new WWWForm();
         string detectFacesEndpoint = $"{baseEndpoint}detect";
 
@@ -330,7 +392,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     internal IEnumerator GetPerson(string personId)
     {
-        InvokeRepeating("LaunchProjectile", 0f, 5f);
+        
         string getGroupEndpoint = $"{baseEndpoint}persongroups/{personGroupId}/persons/{personId}?";
         WWWForm webForm = new WWWForm();
 
@@ -348,9 +410,11 @@ public class FaceAnalysis : MonoBehaviour {
             labelText.text = identifiedPerson_RootObject.name;
             handles = identifiedPerson_RootObject.userData.Split('|');
 
+            CancelInvoke();
+
             LoadInstagramContent(handles[1]);
             LoadTwitterContent(handles[0]);
-            InvokeRepeating("LaunchProjectile", 0f, 5f);
+            ui.SetActive(true);
         }
     }
     public void LaunchProjectile()
