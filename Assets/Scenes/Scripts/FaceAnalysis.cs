@@ -182,10 +182,13 @@ public class FaceAnalysis : MonoBehaviour {
         //Debug.Log("following: " + followingMatches[0].Captures[0].Value);
         Debug.Log("Matches size: " + matches.Count);
 
-        if(matches.Count > 0 )
+        instaProfileUI.transform.GetChild(1).GetComponent<Text>().text = "@" + handles[1];
+
+        if (matches.Count > 0 )
         {
             instaProfilePic = matches[0].Captures[0].Value;
-            StartCoroutine(DownloadIGImage(instaProfilePic, 0));
+            StartCoroutine(DownloadIGProfile(instaProfilePic));
+            Debug.Log("IG PROFILE PIC: " + instaProfilePic);
         }
 
         if(followersMatches.Count > 0 )
@@ -243,6 +246,19 @@ public class FaceAnalysis : MonoBehaviour {
         //StartCoroutine(DownloadIGImage(postUrls[instaIndex]));
     }
 
+    private IEnumerator DownloadIGProfile(string url)
+    {
+        using (WWW igImage = new WWW(url))
+        {
+            Texture2D tex;
+            tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
+            yield return igImage;
+            igImage.LoadImageIntoTexture(tex);
+            instaProfileUI.transform.GetChild(0).GetComponent<RawImage>().texture = tex;
+
+        }
+    }
+
     private IEnumerator DownloadIGImage(string url, int index) {
         using (WWW igImage = new WWW(url)) 
         {
@@ -251,12 +267,6 @@ public class FaceAnalysis : MonoBehaviour {
             yield return igImage;
             igImage.LoadImageIntoTexture(tex);
             instaImages[index] = tex;
-
-            if(index == 0)
-            {
-                instaProfile = tex;
-                instaProfileUI.transform.GetChild(0).GetComponent<RawImage>().texture = tex;
-            }
 
             //GameObject instaObject = Instantiate(instagramUIPrefab, mainCanvas.transform);
             //instaUI.GetComponent<RawImage>().texture = tex;
