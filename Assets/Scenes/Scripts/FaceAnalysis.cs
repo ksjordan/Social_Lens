@@ -122,8 +122,10 @@ public class FaceAnalysis : MonoBehaviour {
         yield return req;
         // regex for image Urls
         Regex rgx = new Regex(@"https?:\/\/(scontent-lax3)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
-        // regex for followers/following
-        Regex followersRrgx = new Regex(@"([0-9]+ Follow[a-z]+)");
+        // regex for followers
+        Regex followersRrgx = new Regex(@"([0-9]+ Followers)");
+        // regex for following
+        Regex followingRgx = new Regex(@"([0-9]+ Following");
         // regex for number of posts
         Regex numOfPostsRegex = new Regex(@"([0-9]+ Posts)");
 
