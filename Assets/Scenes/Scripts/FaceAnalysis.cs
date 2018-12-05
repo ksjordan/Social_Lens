@@ -120,7 +120,13 @@ public class FaceAnalysis : MonoBehaviour {
 
     private IEnumerator OnResponse(WWW req) {
         yield return req;
+        // regex for image Urls
         Regex rgx = new Regex(@"https?:\/\/(scontent-lax3)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
+        // regex for followers/following
+        Regex followersRrgx = new Regex(@"([0-9]+ Follow[a-z]+)");
+        // regex for number of posts
+        Regex numOfPostsRegex = new Regex(@"([0-9]+ Posts)");
+
         MatchCollection matches = rgx.Matches(req.text);
 
         for(int i = 3; i < 4; i++) {
