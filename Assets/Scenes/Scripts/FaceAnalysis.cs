@@ -108,7 +108,7 @@ public class FaceAnalysis : MonoBehaviour {
             twitterIndex = 0;
             Debug.Log("twitter image url: " + newUser.profile_image_url);
             StartCoroutine(DownloadTwitterImage(newUser.profile_image_url));
-            InvokeRepeating("DisplayTweet", 0f, 5f);
+            InvokeRepeating("DisplayTweet", 0f, 10f);
         }
         else
         {
@@ -124,7 +124,6 @@ public class FaceAnalysis : MonoBehaviour {
             tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
             yield return twitterImage;
             twitterImage.LoadImageIntoTexture(tex);
-
             tweetUI.transform.GetChild(0).GetComponent<RawImage>().texture = tex;
         }
     }
@@ -133,7 +132,6 @@ public class FaceAnalysis : MonoBehaviour {
     {
         if(tweets != null)
         {
-            RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
             Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
             Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
             Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
@@ -392,7 +390,7 @@ public class FaceAnalysis : MonoBehaviour {
                 StartCoroutine(GetPerson(candidateRO.candidates[0].personId));
 
                 // Delay the next "GetPerson" call, so all faces candidate are displayed properly
-                yield return new WaitForSeconds(5);
+                yield return new WaitForSeconds(30);
             }
         }
     }
