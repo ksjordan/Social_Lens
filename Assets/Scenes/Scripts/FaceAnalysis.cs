@@ -13,8 +13,8 @@ using SimpleJSON;
 using System.Text.RegularExpressions;
 using UnityEngine.UI;
 
-public class FaceAnalysis : MonoBehaviour {
 
+public class FaceAnalysis : MonoBehaviour {
     /// <summary>
     /// Allows this class to behave like a singleton
     /// </summary>
@@ -24,6 +24,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// The analysis result text
     /// </summary>
     private TextMesh labelText;
+    public int texnum = 0;
 
     /// <summary>
     /// Bytes of the image captured with camera
@@ -58,15 +59,23 @@ public class FaceAnalysis : MonoBehaviour {
     public GameObject twitterUIPrefab;
 
     public string[] handles;
+
+    //Instagram variables
+    const int SKIP = 7;
+    const int MAX_POSTS = 5;
+    private string instaProfilePic;
+    private string[] postUrls;
+    private int instaIndex;
+
     //Twitter variables
     private string twitterKey = "SfR10L97q4Soh6v7wii2vnShR";
     private string twitterKeyChris = "PnJkJydITUGMkXUifhkvAh0dM";
     private string secret = "TINPY6L5pWFAW3zFKQz2T9WymDa1jVQD2az3Ym98eVgsPB43kI";
     private string secretChris = "nQSFyNkOMBnEPh7AGBlYIKYYYpb6YWSJvH4oxzZFpa5MScCcwi";
     private string accessToken;
+    private int twitterIndex;
     Twitter.TwitterUser newUser;
     Twitter.Tweet[] tweets;
-    public Dialog dialogPrefab;
 
     /// <summary>
     /// Initialises this class
@@ -145,19 +154,38 @@ public class FaceAnalysis : MonoBehaviour {
         MatchCollection matches = rgx.Matches(req.text);
 
         Debug.Log("Matches size: " + matches.Count);
+        
+        int numPosts = matches.Count >= (SKIP * MAX_POSTS + 3) ? MAX_POSTS : (matches.Count - 3) / SKIP;
+        postUrls = new string[numPosts + 1];
+        Debug.Log("Num posts: " + numPosts);
 
-        for(int i = 3; i < 4; i++) {
-            CaptureCollection captures = matches[i].Captures;
-            Debug.Log("Capture length: " + captures.Count);
-            for (int j = 0; j < captures.Count; j++)
-            {
-                Debug.Log("capture value: " + captures[j].Value);
-            }
+        //First image is always the profile pic
+        instaProfilePic = matches[0].Captures[0].Value;
 
-            StartCoroutine(DownloadIGImage(captures[0].Value));
+        //for (int i = 0; i < matches.Count; i++)
+        //{
+        //    CaptureCollection captures = matches[i].Captures;
+        //    Debug.Log("pic " + i + ": " + captures[0].Value);
+        //    //StartCoroutine(DownloadIGImage(captures[0].Value));
+        //}
+
+        //Create list of instagram URLs
+        for (int i = 0; i < numPosts; i++)
+        {
+            CaptureCollection captures = matches[(i * SKIP) + 3].Captures;
+            postUrls[i] = captures[0].Value;
+            Debug.Log("added pic: " + postUrls[i]);
         }
+        instaIndex = 0;
+        InvokeRepeating("DisplayInstaPic", 0f, 5f);
     }
 
+    private void DisplayInstaPic()
+    {
+        StartCoroutine(DownloadIGImage(postUrls[instaIndex]));
+        instaIndex = instaIndex >= postUrls.Length - 1 ? 1 : instaIndex + 1;
+
+    }
 
     private IEnumerator DownloadIGImage(string url) {
         using (WWW igImage = new WWW(url)) 
@@ -173,6 +201,7 @@ public class FaceAnalysis : MonoBehaviour {
             instaUI.GetComponent<RawImage>().texture = tex;
 
             Debug.Log("Successfully set texture");
+            instaIndex = instaIndex >= postUrls.Length - 1 ? 0 : instaIndex + 1;
         }
     }
 
@@ -189,12 +218,12 @@ public class FaceAnalysis : MonoBehaviour {
 
         // Resize and position the new cursor
         newLabel.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-        newLabel.transform.position = new Vector3(0f, 8f, 60f);
+        newLabel.transform.position = new Vector3(-16f, 9f, 60f);
 
         // Creating the text of the Label
         labelText = newLabel.AddComponent<TextMesh>();
-        labelText.anchor = TextAnchor.MiddleCenter;
-        labelText.alignment = TextAlignment.Center;
+        labelText.anchor = TextAnchor.UpperLeft;
+        labelText.alignment = TextAlignment.Left;
         labelText.tabSize = 4;
         labelText.fontSize = 50;
         labelText.text = ".";
@@ -301,6 +330,7 @@ public class FaceAnalysis : MonoBehaviour {
     /// </summary>
     internal IEnumerator GetPerson(string personId)
     {
+        InvokeRepeating("LaunchProjectile", 0f, 5f);
         string getGroupEndpoint = $"{baseEndpoint}persongroups/{personGroupId}/persons/{personId}?";
         WWWForm webForm = new WWWForm();
 
@@ -320,70 +350,157 @@ public class FaceAnalysis : MonoBehaviour {
 
             LoadInstagramContent(handles[1]);
             LoadTwitterContent(handles[0]);
-            //Texture2D tex;
-            //RawImage instaPic = instaUI.GetComponent<RawImage>();
-            //RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
-            //Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
-            //Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
-            //Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
-            //Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
-            //Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
-            //Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
+            InvokeRepeating("LaunchProjectile", 0f, 5f);
+        }
+    }
+    public void LaunchProjectile()
+    {
+        // Texture2D tex;
+        // RawImage instaPic = instaUI.GetComponent<RawImage>();
+        // RawImage profileImg = tweetUI.transform.GetChild(0).GetComponent<RawImage>();
+        // Text fullName = tweetUI.transform.GetChild(1).GetComponent<Text>();
+        // Text handle = tweetUI.transform.GetChild(2).GetComponent<Text>();
+        // Text body = tweetUI.transform.GetChild(3).GetComponent<Text>();
+        // Text date = tweetUI.transform.GetChild(4).GetComponent<Text>();
+        // Text retweet = tweetUI.transform.GetChild(5).GetComponent<Text>();
+        // Text likes = tweetUI.transform.GetChild(6).GetComponent<Text>();
 
-            //switch (handles[0])
-            //{
-            //    case "cartercorpp":
-            //        fullName.text = "Christin Carter";
-            //        handle.text = "@cartercorpp";
-            //        body.text = "Hello Twitter! #myfirstTweet";
-            //        date.text = "12:44 AM - 29 Nov 2018";
-            //        retweet.text = "0";
-            //        likes.text = "0";
-            //        tex = Resources.Load("Images/ChrisPic") as Texture2D;
-            //        instaPic.texture = tex;
-            //        break;
-            //    case "renu__hiremath":
-            //        fullName.text = "Renu Hirematch";
-            //        handle.text = "@renu__hiremath";
-            //        body.text = "Hello World!!!";
-            //        date.text = "10:25 PM - 28 Nov 2018";
-            //        retweet.text = "0";
-            //        likes.text = "0";
-            //        tex = Resources.Load("Images/RenuPic") as Texture2D;
-            //        instaPic.texture = tex;
-            //        break;
-            //    case "yquansah_":
-            //        fullName.text = "Yoofi Quansah";
-            //        handle.text = "@yquansah_";
-            //        body.text = "There’s really people salty we got lebron 😂😂😂😂 that’s amazing. Take your hate somewhere else bro we don’t need that in LA. We got the best player in the world fam WE LIVE #Showtime";
-            //        date.text = "5:36 PM - 1 Jul 2018";
-            //        retweet.text = "1";
-            //        likes.text = "7";
-            //        tex = Resources.Load("Images/YoofiPic") as Texture2D;
-            //        instaPic.texture = tex;
-            //        break; 
-            //    case "savithasameer":
-            //        fullName.text = "Savitha Sameerdas";
-            //        handle.text = "@SavithaSameer";
-            //        body.text = "#vmwarecodehouse #serverless #STEM Amazing weekend indeed!";
-            //        date.text = "10:28 PM - 30 Jul 2018";
-            //        retweet.text = "1";
-            //        likes.text = "1";
-            //        tex = Resources.Load("Images/SavithaPic") as Texture2D;
-            //        instaPic.texture = tex;
-            //        break;
-            //    case "kjcookies":
-            //        fullName.text = "Kristin Jordan";
-            //        handle.text = "@kjcookies";
-            //        body.text = "Woah";
-            //        date.text = "8:04 AM - 29 Nov 2018";
-            //        retweet.text = "0";
-            //        likes.text = "0";
-            //        tex = Resources.Load("Images/KristinPic") as Texture2D;
-            //        instaPic.texture = tex;
-            //        break;
-                    
-            //}
+        // switch (handles[0])
+        // {
+        //     case "cartercorpp":
+        //         fullName.text = "Christin Carter";
+        //         handle.text = "@cartercorpp";
+        //         body.text = "Hello Twitter! #myfirstTweet";
+        //         date.text = "12:44 AM - 29 Nov 2018";
+        //         retweet.text = "0";
+        //         likes.text = "0";
+        //         if (texnum == 1)
+        //         {
+        //             tex = Resources.Load("Images/ChrisPic") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 2)
+        //         {
+        //             tex = Resources.Load("Images/ChrisPic2") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 3)
+        //         {
+        //             tex = Resources.Load("Images/ChrisPic3") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 4)
+        //         {
+        //             tex = Resources.Load("Images/ChrisPic4") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 5)
+        //         {
+        //             tex = Resources.Load("Images/ChrisPic5") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         break;
+        //     case "renu__hiremath":
+        //         LoadTwitterContent("renu__hiremath");
+        //         if (texnum == 1)
+        //         {
+        //             tex = Resources.Load("Images/RenuPic") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 2)
+        //         {
+        //             tex = Resources.Load("Images/RenuPic2") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 3)
+        //         {
+        //             tex = Resources.Load("Images/RenuPic3") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 4)
+        //         {
+        //             tex = Resources.Load("Images/RenuPic4") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 5)
+        //         {
+        //             tex = Resources.Load("Images/RenuPic5") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         break;
+        //     case "yquansah_":
+        //         fullName.text = "Yoofi Quansah";
+        //         handle.text = "@yquansah_";
+        //         body.text = "There’s really people salty we got lebron 😂😂😂😂 that’s amazing. Take your hate somewhere else bro we don’t need that in LA. We got the best player in the world fam WE LIVE #Showtime";
+        //         date.text = "5:36 PM - 1 Jul 2018";
+        //         retweet.text = "1";
+        //         likes.text = "7";
+        //         tex = Resources.Load("Images/YoofiPic") as Texture2D;
+        //         instaPic.texture = tex;
+        //         break;
+        //     case "savithasameer":
+        //         fullName.text = "Savitha Sameerdas";
+        //         handle.text = "@SavithaSameer";
+        //         body.text = "#vmwarecodehouse #serverless #STEM Amazing weekend indeed!";
+        //         date.text = "10:28 PM - 30 Jul 2018";
+        //         retweet.text = "1";
+        //         likes.text = "1";
+        //         tex = Resources.Load("Images/SavithaPic") as Texture2D;
+        //         instaPic.texture = tex;
+        //         break;
+        //     case "kjcookies":
+        //         fullName.text = "Kristin Jordan";
+        //         handle.text = "@kjcookies";
+        //         //body.text = "Woah";
+        //         //date.text = "8:04 AM - 29 Nov 2018";
+        //         //retweet.text = "0";
+        //         //likes.text = "0";
+        //         Debug.Log(texnum);
+        //         if (texnum == 1)
+        //         {
+        //             body.text = "Woah";
+        //             date.text = "8:04 AM - 29 Nov 2018";
+        //             retweet.text = "0";
+        //             likes.text = "0";
+        //             tex = Resources.Load("Images/KristinPic") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 2)
+        //         {
+        //             body.text = "WATCH: #Hyolyn Turns Heads In Sexy “Dally” MV Featuring Gray https://www.soompi.com/2018/04/23/watch-hyolyn-turns-heads-sexy-dally-mv-featuring-gray/ …";
+        //             date.text = "2:09 AM - 23 Apr 2018";
+        //             retweet.text = "0";
+        //             likes.text = "0";
+        //             tex = Resources.Load("Images/KristinPic2") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 3)
+        //         {
+        //             tex = Resources.Load("Images/KristinPic3") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 4)
+        //         {
+        //             tex = Resources.Load("Images/KristinPic4") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         else if (texnum == 5)
+        //         {
+        //             tex = Resources.Load("Images/KristinPic5") as Texture2D;
+        //             instaPic.texture = tex;
+        //         }
+        //         //tex = Resources.Load("Images/KristinPic") as Texture2D;
+        //         //instaPic.texture = tex;
+        //         break;
+
+        // }
+        if (texnum == 5)
+        {
+            texnum = 1;
+        }
+        else
+        {
+            texnum += 1;
         }
     }
 }
